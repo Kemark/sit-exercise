@@ -24,6 +24,9 @@ import de.sit.exercise.features.category.ICategoryService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Crud Operations for managing categories
+ */
 @RestController
 @RequestMapping("api")
 @RequiredArgsConstructor

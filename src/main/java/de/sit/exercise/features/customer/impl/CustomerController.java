@@ -23,6 +23,10 @@ import de.sit.exercise.features.customer.CustomerMapper;
 import de.sit.exercise.features.customer.ICustomerService;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Crud Operations for managing customer. A Cusomer is need for
+ * authentification.
+ */
 @RestController
 @RequestMapping("api")
 @RequiredArgsConstructor

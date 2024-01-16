@@ -13,6 +13,9 @@ import de.sit.exercise.features.token.ITokenService;
 import de.sit.exercise.features.token.Credential;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Getting the token for authentificiation.
+ */
 @RestController
 @RequestMapping("api")
 @RequiredArgsConstructor

@@ -11,6 +11,15 @@ spring:
         password: ${MSSQL_SIT_EXERCISE_PASSWORD}
         driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
 
+# OpenApi
+springdoc:
+    swagger-ui:
+        path: /swagger.html
+        disable-swagger-default-url: true
+        defaultModelsExpandDepth: 4
+        show-extensions: true
+        show-common-extensions: true
+
 logging:
     level:
         org:

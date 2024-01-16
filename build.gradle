@@ -26,27 +26,35 @@ ext {
 	versions = [
 		checkstyle	   : "0.0.41",
 		mapstruct      : "1.5.5.Final",
-		instancio      : "4.0.0"
+		instancio      : "4.0.0",
+		springDoc 	   : "2.3.0",
+		javaDocTherapi : "0.13.0"
   	]
 }
 
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	compileOnly 'org.projectlombok:lombok'
+
+	checkstyle "io.spring.javaformat:spring-javaformat-checkstyle:${versions.checkstyle}"
+
+	// # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+	// data / jpa
+	// # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 	runtimeOnly 'com.microsoft.sqlserver:mssql-jdbc'
+	testImplementation 'org.testcontainers:mssqlserver'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	// # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+	// lombok
+	// # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
-	testImplementation 'org.springframework.security:spring-security-test'
-	testImplementation 'org.testcontainers:junit-jupiter'
-	testImplementation 'org.testcontainers:mssqlserver'
+	compileOnly 'org.projectlombok:lombok'
 
 	// # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 	// Map Struct
@@ -55,8 +63,22 @@ dependencies {
 	annotationProcessor "org.mapstruct:mapstruct-processor:${versions.mapstruct}"	 
 	testAnnotationProcessor "org.mapstruct:mapstruct-processor:${versions.mapstruct}"	 
 
+	// # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+	// Swagger / Spring Doc
+	// # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${versions.springDoc}"
+	annotationProcessor "com.github.therapi:therapi-runtime-javadoc-scribe:${versions.javaDocTherapi}"
+    implementation "com.github.therapi:therapi-runtime-javadoc:${versions.javaDocTherapi}"
+
+	// # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+	// Spring Test
+	// # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 	testImplementation "org.instancio:instancio-junit:${versions.instancio}"
 	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation 'org.testcontainers:junit-jupiter'
+
 }
 
 tasks.named('test') {

@@ -23,6 +23,9 @@ import de.sit.exercise.features.book.BookMapper;
 import de.sit.exercise.features.book.IBookService;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Crud Operations for managing books
+ */
 @RestController
 @RequestMapping("api")
 @RequiredArgsConstructor
