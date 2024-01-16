@@ -7,7 +7,9 @@ import org.springframework.lang.NonNull;
 import de.sit.exercise.util.service.IService;
 
 /**
+ * Categorie service interface
  *
+ * The generic crud implemmentions are in the base interface (IService).
  */
 public interface ICategoryService extends IService<Category, CategoryDto> {
     /**

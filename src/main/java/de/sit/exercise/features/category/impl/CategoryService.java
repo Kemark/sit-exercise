@@ -14,17 +14,19 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
+ * Categorie service implemenation
  *
+ * The generic crud implemmentions are in the base interface (IService).
  */
 @Service
 @Getter
 @RequiredArgsConstructor
 @Transactional
 public class CategoryService implements ICategoryService {
+    private String entityName = "Category";
     private final CategoryMapper mapper;
     private final CategoryRepository repository;
     private final BookRepository bookRepository;
-    private String entityName = "Category";
 
     /**
      * Retrieves the amount of books, associated to the category.
