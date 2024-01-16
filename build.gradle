@@ -25,7 +25,8 @@ repositories {
 ext {
 	versions = [
 		checkstyle	   : "0.0.41",
-		mapstruct      : "1.5.5.Final"
+		mapstruct      : "1.5.5.Final",
+		instancio      : "4.0.0"
   	]
 }
 
@@ -54,7 +55,8 @@ dependencies {
 	annotationProcessor "org.mapstruct:mapstruct-processor:${versions.mapstruct}"	 
 	testAnnotationProcessor "org.mapstruct:mapstruct-processor:${versions.mapstruct}"	 
 
-	checkstyle "io.spring.javaformat:spring-javaformat-checkstyle:${versions.checkstyle}"
+	testImplementation "org.instancio:instancio-junit:${versions.instancio}"
+	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
 }
 
 tasks.named('test') {

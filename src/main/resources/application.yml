@@ -1,0 +1,18 @@
+spring:
+    jpa:
+        hibernate:
+            ddl-auto: update
+        properties:
+            hibernate:
+                dialect: org.hibernate.dialect.SQLServerDialect
+    datasource:
+        url: ${MSSQL_SIT_EXERCISE_JDBC_URL}
+        username: ${MSSQL_SIT_EXERCISE_USERNAME}
+        password: ${MSSQL_SIT_EXERCISE_PASSWORD}
+        driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+
+logging:
+    level:
+        org:
+            springframework:
+                security: trace
