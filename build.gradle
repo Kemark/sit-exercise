@@ -2,7 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.2.1'
 	id 'io.spring.dependency-management' version '1.1.4'
-		id 'checkstyle'
+	id 'checkstyle'
 }
 
 group = 'de.sit'
@@ -24,7 +24,8 @@ repositories {
 
 ext {
 	versions = [
-		checkstyle	   : "0.0.41"
+		checkstyle	   : "0.0.41",
+		mapstruct      : "1.5.5.Final"
   	]
 }
 
@@ -45,6 +46,14 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation 'org.testcontainers:junit-jupiter'
 	testImplementation 'org.testcontainers:mssqlserver'
+
+	// # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+	// Map Struct
+	// # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+	implementation "org.mapstruct:mapstruct:${versions.mapstruct}"
+	annotationProcessor "org.mapstruct:mapstruct-processor:${versions.mapstruct}"	 
+	testAnnotationProcessor "org.mapstruct:mapstruct-processor:${versions.mapstruct}"	 
+
 	checkstyle "io.spring.javaformat:spring-javaformat-checkstyle:${versions.checkstyle}"
 }
 
