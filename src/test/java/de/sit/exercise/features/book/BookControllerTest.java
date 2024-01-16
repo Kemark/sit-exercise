@@ -2,8 +2,6 @@ package de.sit.exercise.features.book;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.UUID;
-
 import org.instancio.Instancio;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Assertions;
@@ -24,14 +22,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.sit.exercise.features.category.CategoryDto;
-import de.sit.exercise.util.AbstractContainerTest;
+import de.sit.exercise.util.EntityGenerationHelper;
 
 @SpringBootTest
 @Testcontainers
 @TestMethodOrder(OrderAnnotation.class)
 @AutoConfigureMockMvc
-class BookControllerTest extends AbstractContainerTest {
+class BookControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -41,6 +38,9 @@ class BookControllerTest extends AbstractContainerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private EntityGenerationHelper entityGenerator;
 
     @Container
     private static final MSSQLServerContainer<?> SQLSERVER_CONTAINER = new MSSQLServerContainer<>(
@@ -85,10 +85,10 @@ class BookControllerTest extends AbstractContainerTest {
     void testUpdateBookWithoutCredential() throws Exception {
 
         var book = Instancio.create(BookDto.class);
-        book.setCategoryId(getCatetoryId());
+        book.setCategoryId(entityGenerator.getCatetoryId());
 
         // first a new book
-        addbook(book);
+        entityGenerator.addbook(book);
 
         // then update the book
         var bookToUpdate = Instancio.create(BookDto.class);
@@ -110,10 +110,10 @@ class BookControllerTest extends AbstractContainerTest {
     void testDeleteBookWithoutCredential() throws Exception {
 
         var book = Instancio.create(BookDto.class);
-        book.setCategoryId(getCatetoryId());
+        book.setCategoryId(entityGenerator.getCatetoryId());
 
         // first a new book
-        addbook(book);
+        entityGenerator.addbook(book);
 
         // then update the book
         mockMvc.perform(
@@ -130,9 +130,9 @@ class BookControllerTest extends AbstractContainerTest {
     @DisplayName("Create a book")
     void testAddBook() throws Exception {
         var book = Instancio.create(BookDto.class);
-        book.setCategoryId(getCatetoryId());
+        book.setCategoryId(entityGenerator.getCatetoryId());
 
-        addbook(book);
+        entityGenerator.addbook(book);
     }
 
     /**
@@ -149,7 +149,7 @@ class BookControllerTest extends AbstractContainerTest {
                         .post("/api/book")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
-                        .header("Authorization", getBearerToken())
+                        .header("Authorization", entityGenerator.getBearerToken())
                         .content(payload))
                 .andExpect(status().isConflict());
     }
@@ -161,10 +161,10 @@ class BookControllerTest extends AbstractContainerTest {
     @DisplayName("Read after Create")
     void testReadBookAfterCreate() throws Exception {
         var book = Instancio.create(BookDto.class);
-        book.setCategoryId(getCatetoryId());
+        book.setCategoryId(entityGenerator.getCatetoryId());
 
-        addbook(book);
-        var addedbook = readBook(book.getId());
+        entityGenerator.addbook(book);
+        var addedbook = entityGenerator.readBook(book.getId());
         Assertions.assertEquals(book, addedbook);
     }
 
@@ -178,11 +178,11 @@ class BookControllerTest extends AbstractContainerTest {
 
         for (var book : books) {
             // add a book
-            book.setCategoryId(getCatetoryId());
-            addbook(book);
+            book.setCategoryId(entityGenerator.getCatetoryId());
+            entityGenerator.addbook(book);
 
             // read the added book
-            var addedbook = readBook(book.getId());
+            var addedbook = entityGenerator.readBook(book.getId());
 
             // check each created book
             Assertions.assertEquals(book, addedbook);
@@ -197,16 +197,16 @@ class BookControllerTest extends AbstractContainerTest {
     @DisplayName("Update a book")
     void testUpdateBooks() throws Exception {
         var book = Instancio.create(BookDto.class);
-        book.setCategoryId(getCatetoryId());
+        book.setCategoryId(entityGenerator.getCatetoryId());
 
         // first a new book
-        addbook(book);
+        entityGenerator.addbook(book);
 
         // then update the book
         var bookToUpdate = Instancio.create(BookDto.class);
         bookToUpdate.setId(book.getId());
         bookToUpdate.setCategoryId(book.getCategoryId());
-        updateBook(book.getId(), bookToUpdate);
+        entityGenerator.updateBook(book.getId(), bookToUpdate);
     }
 
     /**
@@ -216,19 +216,19 @@ class BookControllerTest extends AbstractContainerTest {
     @DisplayName("Read after Update")
     void testReadbookAfterUpdate() throws Exception {
         var book = Instancio.create(BookDto.class);
-        book.setCategoryId(getCatetoryId());
+        book.setCategoryId(entityGenerator.getCatetoryId());
 
         // add a new book
-        addbook(book);
+        entityGenerator.addbook(book);
 
         // then update the book
         var bookToUpdate = Instancio.create(BookDto.class);
         bookToUpdate.setId(book.getId());
         bookToUpdate.setCategoryId(book.getCategoryId());
-        updateBook(book.getId(), bookToUpdate);
+        entityGenerator.updateBook(book.getId(), bookToUpdate);
 
         // then update the book
-        var updatebook = readBook(book.getId());
+        var updatebook = entityGenerator.readBook(book.getId());
 
         Assertions.assertEquals(bookToUpdate, updatebook);
     }
@@ -240,19 +240,19 @@ class BookControllerTest extends AbstractContainerTest {
     @DisplayName("Update Category")
     void testUpdateBookCategory() throws Exception {
         var book = Instancio.create(BookDto.class);
-        book.setCategoryId(getCatetoryId());
+        book.setCategoryId(entityGenerator.getCatetoryId());
 
         // first a new book
-        addbook(book);
+        entityGenerator.addbook(book);
 
         // then update the book
         var bookToUpdate = Instancio.create(BookDto.class);
         bookToUpdate.setId(book.getId());
-        bookToUpdate.setCategoryId(getCatetoryId());
+        bookToUpdate.setCategoryId(entityGenerator.getCatetoryId());
 
-        updateBook(book.getId(), bookToUpdate);
+        entityGenerator.updateBook(book.getId(), bookToUpdate);
 
-        var updateCategory = readBook(book.getId());
+        var updateCategory = entityGenerator.readBook(book.getId());
         Assertions.assertEquals(bookToUpdate.getCategoryId(), updateCategory.getCategoryId());
     }
 
@@ -264,10 +264,10 @@ class BookControllerTest extends AbstractContainerTest {
     void testReadbookWithoutCredential() throws Exception {
 
         var book = Instancio.create(BookDto.class);
-        book.setCategoryId(getCatetoryId());
+        book.setCategoryId(entityGenerator.getCatetoryId());
 
         // first a new book
-        addbook(book);
+        entityGenerator.addbook(book);
 
         // then update the book
         mockMvc.perform(
@@ -284,10 +284,10 @@ class BookControllerTest extends AbstractContainerTest {
     @DisplayName("Title together with Author must be unique")
     void testTitleAndAuthorMustBeUnique() throws Exception {
         var book = Instancio.create(BookDto.class);
-        book.setCategoryId(getCatetoryId());
+        book.setCategoryId(entityGenerator.getCatetoryId());
 
         // add a new book
-        addbook(book);
+        entityGenerator.addbook(book);
 
         // use the same title and author for the seocnd book
         var secondbook = Instancio.create(BookDto.class);
@@ -300,7 +300,7 @@ class BookControllerTest extends AbstractContainerTest {
                         .post("/api/book")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
-                        .header("Authorization", getBearerToken())
+                        .header("Authorization", entityGenerator.getBearerToken())
                         .content(secondPayload))
                 .andExpect(status().isConflict());
     }
@@ -312,17 +312,17 @@ class BookControllerTest extends AbstractContainerTest {
     @DisplayName("Title must not be unique")
     void testTitleMustNotBeUniqe() throws Exception {
         var book = Instancio.create(BookDto.class);
-        book.setCategoryId(getCatetoryId());
+        book.setCategoryId(entityGenerator.getCatetoryId());
 
         // add a new book
-        addbook(book);
+        entityGenerator.addbook(book);
 
         // use the same title for the second book
         var secondbook = Instancio.create(BookDto.class);
         secondbook.setTitle(book.getTitle());
         secondbook.setCategoryId(book.getCategoryId());
 
-        addbook(secondbook);
+        entityGenerator.addbook(secondbook);
     }
 
     /**
@@ -332,114 +332,17 @@ class BookControllerTest extends AbstractContainerTest {
     @DisplayName("Author must not be unique")
     void testAuthroMustNotBeUniqe() throws Exception {
         var book = Instancio.create(BookDto.class);
-        book.setCategoryId(getCatetoryId());
+        book.setCategoryId(entityGenerator.getCatetoryId());
 
         // add a new book
-        addbook(book);
+        entityGenerator.addbook(book);
 
         // use the same title for the second book
         var secondbook = Instancio.create(BookDto.class);
         secondbook.setAuthor(book.getAuthor());
         secondbook.setCategoryId(book.getCategoryId());
 
-        addbook(secondbook);
-    }
-
-    /**
-     * Add a Book
-     *
-     * @param book dto of the payload
-     * @return response of the request as book dto object
-     */
-    private BookDto addbook(BookDto book) throws Exception {
-        String payload = objectMapper.writeValueAsString(book);
-        var result = mockMvc.perform(
-                MockMvcRequestBuilders //
-                        .post("/api/book")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .header("Authorization", getBearerToken())
-                        .content(payload))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        var response = result.getResponse().getContentAsString();
-        return objectMapper.readValue(response, BookDto.class);
-    }
-
-    /**
-     * Updates a Book
-     *
-     * @param id             unique id of the existing Book
-     * @param updatedBookDto updated Book
-     * @return response of the updated as book dto object
-     */
-    private BookDto updateBook(UUID id, BookDto updatedBookDto) throws Exception {
-        String payload = objectMapper.writeValueAsString(updatedBookDto);
-        var result = mockMvc.perform(
-                MockMvcRequestBuilders //^
-                        .put("/api/book/" + id)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .header("Authorization", getBearerToken())
-                        .content(payload))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        var response = result.getResponse().getContentAsString();
-        return objectMapper.readValue(response, BookDto.class);
-    }
-
-    /**
-     * Read a Book
-     *
-     * @param id unique id of the book
-     * @return response of the requested as book dto object
-     */
-    private BookDto readBook(UUID id) throws Exception {
-        var result = mockMvc.perform(
-                MockMvcRequestBuilders //
-                        .get("/api/book/" + id)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .header("Authorization", getBearerToken()))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        var response = result.getResponse().getContentAsString();
-        return objectMapper.readValue(response, BookDto.class);
-    }
-
-    /**
-     * Add a Category
-     *
-     * @param category dto of the payload
-     * @return response of the request as category dto object
-     */
-    private CategoryDto addCategory(CategoryDto category) throws Exception {
-        String payload = objectMapper.writeValueAsString(category);
-        var result = mockMvc.perform(
-                MockMvcRequestBuilders //
-                        .post("/api/category")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .header("Authorization", getBearerToken())
-                        .content(payload))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        var response = result.getResponse().getContentAsString();
-        return objectMapper.readValue(response, CategoryDto.class);
-    }
-
-    /**
-     * creates a new category for using as associated book category
-     *
-     * @return Id of the created category
-     */
-    private UUID getCatetoryId() throws Exception {
-        var category = Instancio.create(CategoryDto.class);
-        addCategory(category);
-        return category.getId();
+        entityGenerator.addbook(secondbook);
     }
 
 }

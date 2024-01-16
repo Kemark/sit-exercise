@@ -2,8 +2,6 @@ package de.sit.exercise.features.customer;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.UUID;
-
 import org.instancio.Instancio;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Assertions;
@@ -25,13 +23,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.sit.exercise.util.AbstractContainerTest;
+import de.sit.exercise.util.EntityGenerationHelper;
 
 @SpringBootTest
 @Testcontainers
 @TestMethodOrder(OrderAnnotation.class)
 @AutoConfigureMockMvc
-class CustomerControllerTest extends AbstractContainerTest {
+class CustomerControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -44,6 +42,9 @@ class CustomerControllerTest extends AbstractContainerTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EntityGenerationHelper entityGenerator;
 
     @Container
     private static final MSSQLServerContainer<?> SQLSERVER_CONTAINER = new MSSQLServerContainer<>(
@@ -90,7 +91,7 @@ class CustomerControllerTest extends AbstractContainerTest {
         var customer = Instancio.create(CustomerDto.class);
 
         // first a new customer
-        addCustomer(customer);
+        entityGenerator.addCustomer(customer);
 
         // then update the customer
         var customerToUpdate = Instancio.create(CustomerDto.class);
@@ -114,7 +115,7 @@ class CustomerControllerTest extends AbstractContainerTest {
         var customer = Instancio.create(CustomerDto.class);
 
         // first a new customer
-        addCustomer(customer);
+        entityGenerator.addCustomer(customer);
 
         // then update the customer
         mockMvc.perform(
@@ -134,7 +135,7 @@ class CustomerControllerTest extends AbstractContainerTest {
         var customer = Instancio.create(CustomerDto.class);
 
         // first a new customer
-        addCustomer(customer);
+        entityGenerator.addCustomer(customer);
 
         // then update the customer
         mockMvc.perform(
@@ -151,7 +152,7 @@ class CustomerControllerTest extends AbstractContainerTest {
     @DisplayName("Create a Customer")
     void testAddCustomer() throws Exception {
         var customer = Instancio.create(CustomerDto.class);
-        addCustomer(customer);
+        entityGenerator.addCustomer(customer);
     }
 
     /**
@@ -162,8 +163,8 @@ class CustomerControllerTest extends AbstractContainerTest {
     void testReadCustomerAfterCreate() throws Exception {
         var customer = Instancio.create(CustomerDto.class);
 
-        addCustomer(customer);
-        var addedCustomer = readCustomer(customer.getId());
+        entityGenerator.addCustomer(customer);
+        var addedCustomer = entityGenerator.readCustomer(customer.getId());
 
         // the password must be set to null for the comparison, as it is not read by the database
         customer.setPassword(null);
@@ -178,8 +179,8 @@ class CustomerControllerTest extends AbstractContainerTest {
     void testPasswordMustBeEmpty() throws Exception {
         var customer = Instancio.create(CustomerDto.class);
 
-        addCustomer(customer);
-        var addedCustomer = readCustomer(customer.getId());
+        entityGenerator.addCustomer(customer);
+        var addedCustomer = entityGenerator.readCustomer(customer.getId());
 
         Assertions.assertNull(addedCustomer.getPassword());
     }
@@ -192,7 +193,7 @@ class CustomerControllerTest extends AbstractContainerTest {
     void testPasswordMustBeHashed() throws Exception {
         var customer = Instancio.create(CustomerDto.class);
 
-        addCustomer(customer);
+        entityGenerator.addCustomer(customer);
         var addedCustomer = repository.findById(customer.getId()).get();
 
         Assertions.assertTrue(passwordEncoder.matches(customer.getPassword(), addedCustomer.getPassword()));
@@ -208,10 +209,10 @@ class CustomerControllerTest extends AbstractContainerTest {
 
         for (var customer : customers) {
             // add a customer
-            addCustomer(customer);
+            entityGenerator.addCustomer(customer);
 
             // read the added customer
-            var addedCustomer = readCustomer(customer.getId());
+            var addedCustomer = entityGenerator.readCustomer(customer.getId());
 
             // check each created customer
             // the password must be set to null for the comparison, as it is not read by the database
@@ -231,12 +232,12 @@ class CustomerControllerTest extends AbstractContainerTest {
         var customer = Instancio.create(CustomerDto.class);
 
         // first a new customer
-        addCustomer(customer);
+        entityGenerator.addCustomer(customer);
 
         // then update the customer
         var customerToUpdate = Instancio.create(CustomerDto.class);
         customerToUpdate.setId(customer.getId());
-        updateCustomer(customer.getId(), customerToUpdate);
+        entityGenerator.updateCustomer(customer.getId(), customerToUpdate);
     }
 
     /**
@@ -248,15 +249,15 @@ class CustomerControllerTest extends AbstractContainerTest {
         var customer = Instancio.create(CustomerDto.class);
 
         // add a new customer
-        addCustomer(customer);
+        entityGenerator.addCustomer(customer);
 
         // then update the customer
         var customerToUpdate = Instancio.create(CustomerDto.class);
         customerToUpdate.setId(customer.getId());
-        updateCustomer(customer.getId(), customerToUpdate);
+        entityGenerator.updateCustomer(customer.getId(), customerToUpdate);
 
         // then update the customer
-        var updateCustomer = readCustomer(customer.getId());
+        var updateCustomer = entityGenerator.readCustomer(customer.getId());
 
         // the password must be set to null for the comparison, as it is not read by the database
         customerToUpdate.setPassword(null);
@@ -272,7 +273,7 @@ class CustomerControllerTest extends AbstractContainerTest {
         var customer = Instancio.create(CustomerDto.class);
 
         // add a new customer
-        addCustomer(customer);
+        entityGenerator.addCustomer(customer);
 
         var secondCustomer = Instancio.create(CustomerDto.class);
         secondCustomer.setEmail(customer.getEmail());
@@ -283,73 +284,9 @@ class CustomerControllerTest extends AbstractContainerTest {
                         .post("/api/customer")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
-                        .header("Authorization", getBearerToken())
+                        .header("Authorization", entityGenerator.getBearerToken())
                         .content(secondPayload))
                 .andExpect(status().isConflict());
-    }
-
-    /**
-     * Add a Customer
-     *
-     * @param customer dto of the payload
-     * @return response of the request as customer dto object
-     */
-    private CustomerDto addCustomer(CustomerDto customer) throws Exception {
-        String payload = objectMapper.writeValueAsString(customer);
-        var result = mockMvc.perform(
-                MockMvcRequestBuilders //
-                        .post("/api/customer")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .header("Authorization", getBearerToken())
-                        .content(payload))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        var response = result.getResponse().getContentAsString();
-        return objectMapper.readValue(response, CustomerDto.class);
-    }
-
-    /**
-     * Updates a Customer
-     *
-     * @param id                 unique id of the existing Customer
-     * @param updatedCustomerDto updated Customer
-     * @return response of the updated as customer dto object
-     */
-    private CustomerDto updateCustomer(UUID id, CustomerDto updatedCustomerDto) throws Exception {
-        String payload = objectMapper.writeValueAsString(updatedCustomerDto);
-        var result = mockMvc.perform(
-                MockMvcRequestBuilders //
-                        .put("/api/customer/" + id)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .header("Authorization", getBearerToken())
-                        .content(payload))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        var response = result.getResponse().getContentAsString();
-        return objectMapper.readValue(response, CustomerDto.class);
-    }
-
-    /**
-     * Read a Customer
-     *
-     * @param id unique id of the customer
-     * @return response of the requested as customer dto object
-     */
-    private CustomerDto readCustomer(UUID id) throws Exception {
-        var result = mockMvc.perform(
-                MockMvcRequestBuilders //
-                        .get("/api/customer/" + id)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .header("Authorization", getBearerToken()))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        var response = result.getResponse().getContentAsString();
-        return objectMapper.readValue(response, CustomerDto.class);
     }
 
 }

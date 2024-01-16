@@ -28,13 +28,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.sit.exercise.components.auth.JwtTokenProvider;
 import de.sit.exercise.features.customer.CustomerDto;
-import de.sit.exercise.util.AbstractContainerTest;
+import de.sit.exercise.util.EntityGenerationHelper;
 
 @SpringBootTest
 @Testcontainers
 @TestMethodOrder(OrderAnnotation.class)
 @AutoConfigureMockMvc
-class TokenControllerTest extends AbstractContainerTest {
+class TokenControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -44,6 +44,9 @@ class TokenControllerTest extends AbstractContainerTest {
 
     @Autowired
     private JwtTokenProvider tokenProvider;
+
+    @Autowired
+    private EntityGenerationHelper entityGenerator;
 
     @Container
     private static final MSSQLServerContainer<?> SQLSERVER_CONTAINER = new MSSQLServerContainer<>(
@@ -91,7 +94,7 @@ class TokenControllerTest extends AbstractContainerTest {
         var customer = Instancio.create(CustomerDto.class);
 
         // add a customer
-        addCustomer(customer);
+        entityGenerator.addCustomer(customer);
 
         // create another password
         var credential = Instancio.create(Credential.class);
@@ -118,7 +121,7 @@ class TokenControllerTest extends AbstractContainerTest {
         var customer = Instancio.create(CustomerDto.class);
 
         // add a customer
-        addCustomer(customer);
+        entityGenerator.addCustomer(customer);
 
         // use the same credentials
         var credential = new Credential(customer.getPassword(), customer.getEmail());
@@ -131,28 +134,6 @@ class TokenControllerTest extends AbstractContainerTest {
                         .content(payload))
                 .andExpect(status().isOk());
 
-    }
-
-    /**
-     * Add a Customer
-     *
-     * @param customer dto of the payload
-     * @return response of the request as customer dto object
-     */
-    private CustomerDto addCustomer(CustomerDto customer) throws Exception {
-        String payload = objectMapper.writeValueAsString(customer);
-        var result = mockMvc.perform(
-                MockMvcRequestBuilders //
-                        .post("/api/customer")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .header("Authorization", getBearerToken())
-                        .content(payload))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        var response = result.getResponse().getContentAsString();
-        return objectMapper.readValue(response, CustomerDto.class);
     }
 
 }

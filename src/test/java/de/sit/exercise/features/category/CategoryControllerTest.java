@@ -3,8 +3,6 @@ package de.sit.exercise.features.category;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
-import java.util.UUID;
-
 import org.instancio.Instancio;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Assertions;
@@ -26,13 +24,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.sit.exercise.features.book.BookDto;
-import de.sit.exercise.util.AbstractContainerTest;
+import de.sit.exercise.util.EntityGenerationHelper;
 
 @SpringBootTest
 @Testcontainers
 @TestMethodOrder(OrderAnnotation.class)
 @AutoConfigureMockMvc
-class CategoryControllerTest extends AbstractContainerTest {
+class CategoryControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -42,6 +40,9 @@ class CategoryControllerTest extends AbstractContainerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private EntityGenerationHelper entityGenerator;
 
     @Container
     private static final MSSQLServerContainer<?> SQLSERVER_CONTAINER = new MSSQLServerContainer<>(
@@ -88,7 +89,7 @@ class CategoryControllerTest extends AbstractContainerTest {
         var category = Instancio.create(CategoryDto.class);
 
         // first a new category
-        addCategory(category);
+        entityGenerator.addCategory(category);
 
         // then update the category
         var categoryToUpdate = Instancio.create(CategoryDto.class);
@@ -112,7 +113,7 @@ class CategoryControllerTest extends AbstractContainerTest {
         var category = Instancio.create(CategoryDto.class);
 
         // first a new category
-        addCategory(category);
+        entityGenerator.addCategory(category);
 
         // then update the category
         mockMvc.perform(
@@ -129,7 +130,7 @@ class CategoryControllerTest extends AbstractContainerTest {
     @DisplayName("Create a Category")
     void testAddCategory() throws Exception {
         var category = Instancio.create(CategoryDto.class);
-        addCategory(category);
+        entityGenerator.addCategory(category);
     }
 
     /**
@@ -140,8 +141,8 @@ class CategoryControllerTest extends AbstractContainerTest {
     void testReadCategoryAfterCreate() throws Exception {
         var category = Instancio.create(CategoryDto.class);
 
-        addCategory(category);
-        var addedCategory = readCategory(category.getId());
+        entityGenerator.addCategory(category);
+        var addedCategory = entityGenerator.readCategory(category.getId());
         Assertions.assertEquals(category, addedCategory);
     }
 
@@ -155,10 +156,10 @@ class CategoryControllerTest extends AbstractContainerTest {
 
         for (var category : categories) {
             // add a category
-            addCategory(category);
+            entityGenerator.addCategory(category);
 
             // read the added category
-            var addedCategory = readCategory(category.getId());
+            var addedCategory = entityGenerator.readCategory(category.getId());
 
             // check each created category
             Assertions.assertEquals(category, addedCategory);
@@ -175,12 +176,12 @@ class CategoryControllerTest extends AbstractContainerTest {
         var category = Instancio.create(CategoryDto.class);
 
         // first a new category
-        addCategory(category);
+        entityGenerator.addCategory(category);
 
         // then update the category
         var categoryToUpdate = Instancio.create(CategoryDto.class);
         categoryToUpdate.setId(category.getId());
-        updateCategory(category.getId(), categoryToUpdate);
+        entityGenerator.updateCategory(category.getId(), categoryToUpdate);
     }
 
     /**
@@ -192,15 +193,15 @@ class CategoryControllerTest extends AbstractContainerTest {
         var category = Instancio.create(CategoryDto.class);
 
         // add a new category
-        addCategory(category);
+        entityGenerator.addCategory(category);
 
         // then update the category
         var categoryToUpdate = Instancio.create(CategoryDto.class);
         categoryToUpdate.setId(category.getId());
-        updateCategory(category.getId(), categoryToUpdate);
+        entityGenerator.updateCategory(category.getId(), categoryToUpdate);
 
         // then update the category
-        var updateCategory = readCategory(category.getId());
+        var updateCategory = entityGenerator.readCategory(category.getId());
 
         Assertions.assertEquals(categoryToUpdate, updateCategory);
     }
@@ -215,7 +216,7 @@ class CategoryControllerTest extends AbstractContainerTest {
         var category = Instancio.create(CategoryDto.class);
 
         // first a new category
-        addCategory(category);
+        entityGenerator.addCategory(category);
 
         // then update the category
         mockMvc.perform(
@@ -234,7 +235,7 @@ class CategoryControllerTest extends AbstractContainerTest {
         var category = Instancio.create(CategoryDto.class);
 
         // add a new category
-        addCategory(category);
+        entityGenerator.addCategory(category);
 
         var secondCategory = Instancio.create(CategoryDto.class);
         secondCategory.setName(category.getName());
@@ -245,7 +246,7 @@ class CategoryControllerTest extends AbstractContainerTest {
                         .post("/api/category")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
-                        .header("Authorization", getBearerToken())
+                        .header("Authorization", entityGenerator.getBearerToken())
                         .content(secondPayload))
                 .andExpect(status().isConflict());
     }
@@ -260,109 +261,22 @@ class CategoryControllerTest extends AbstractContainerTest {
         var bookCount = 20;
 
         // add a new category
-        addCategory(category);
+        entityGenerator.addCategory(category);
 
         // create 20 books
         var books = Instancio.ofList(BookDto.class).size(bookCount).create();
         for (var book : books) {
             // add a book
             book.setCategoryId(category.getId());
-            addBook(book);
+            entityGenerator.addBook(book);
         }
 
         // read the book count
         mockMvc.perform(
                 MockMvcRequestBuilders //
                         .get("/api/category/" + category.getId() + "/bookCount")
-                        .header("Authorization", getBearerToken()))
+                        .header("Authorization", entityGenerator.getBearerToken()))
                 .andExpect(status().isOk())
                 .andExpect(content().string(String.valueOf(bookCount)));
     }
-
-    /**
-     * Add a Category
-     *
-     * @param category dto of the payload
-     * @return response of the request as category dto object
-     */
-    private CategoryDto addCategory(CategoryDto category) throws Exception {
-        String payload = objectMapper.writeValueAsString(category);
-        var result = mockMvc.perform(
-                MockMvcRequestBuilders //
-                        .post("/api/category")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .header("Authorization", getBearerToken())
-                        .content(payload))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        var response = result.getResponse().getContentAsString();
-        return objectMapper.readValue(response, CategoryDto.class);
-    }
-
-    /**
-     * Updates a Category
-     *
-     * @param id                 unique id of the existing Category
-     * @param updatedCategoryDto updated Category
-     * @return response of the updated as category dto object
-     */
-    private CategoryDto updateCategory(UUID id, CategoryDto updatedCategoryDto) throws Exception {
-        String payload = objectMapper.writeValueAsString(updatedCategoryDto);
-        var result = mockMvc.perform(
-                MockMvcRequestBuilders //
-                        .put("/api/category/" + id)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .header("Authorization", getBearerToken())
-                        .content(payload))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        var response = result.getResponse().getContentAsString();
-        return objectMapper.readValue(response, CategoryDto.class);
-    }
-
-    /**
-     * Read a Category
-     *
-     * @param id unique id of the category
-     * @return response of the requested as category dto object
-     */
-    private CategoryDto readCategory(UUID id) throws Exception {
-        var result = mockMvc.perform(
-                MockMvcRequestBuilders //
-                        .get("/api/category/" + id)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .header("Authorization", getBearerToken()))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        var response = result.getResponse().getContentAsString();
-        return objectMapper.readValue(response, CategoryDto.class);
-    }
-
-    /**
-     * Add a Book
-     *
-     * @param book dto of the payload
-     * @return response of the request as book dto object
-     */
-    private BookDto addBook(BookDto book) throws Exception {
-        String payload = objectMapper.writeValueAsString(book);
-        var result = mockMvc.perform(
-                MockMvcRequestBuilders //
-                        .post("/api/book")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .header("Authorization", getBearerToken())
-                        .content(payload))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        var response = result.getResponse().getContentAsString();
-        return objectMapper.readValue(response, BookDto.class);
-    }
-
 }
