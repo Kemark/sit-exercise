@@ -70,7 +70,6 @@ public interface IMapper<T1 extends IModel, T2> {
      * @param modelPage page containing models
      * @param pageable  containing frame size and page
      *
-     * @return page of
      */
     default Page<T2> toPage(Page<T1> modelPage, @NonNull Pageable pageable) {
         return new PageImpl<>(this.toList(modelPage.getContent()), pageable, modelPage.getTotalElements());
