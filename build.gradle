@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.2.1'
 	id 'io.spring.dependency-management' version '1.1.4'
+		id 'checkstyle'
 }
 
 group = 'de.sit'
@@ -21,6 +22,13 @@ repositories {
 	mavenCentral()
 }
 
+ext {
+	versions = [
+		checkstyle	   : "0.0.41"
+  	]
+}
+
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -37,8 +45,15 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation 'org.testcontainers:junit-jupiter'
 	testImplementation 'org.testcontainers:mssqlserver'
+	checkstyle "io.spring.javaformat:spring-javaformat-checkstyle:${versions.checkstyle}"
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+checkstyle {
+    toolVersion '9.3'
+    maxWarnings = 0
+    ignoreFailures false
 }

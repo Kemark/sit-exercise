@@ -10,14 +10,13 @@ import org.testcontainers.utility.DockerImageName;
 @TestConfiguration(proxyBeanMethods = false)
 public class TestExerciseApplication {
 
-	@Bean
-	@ServiceConnection
-	MSSQLServerContainer<?> sqlServerContainer() {
-		return new MSSQLServerContainer<>(DockerImageName.parse("mcr.microsoft.com/mssql/server:latest"));
-	}
+    @Bean
+    @ServiceConnection
+    MSSQLServerContainer<?> sqlServerContainer() {
+        return new MSSQLServerContainer<>(DockerImageName.parse("mcr.microsoft.com/mssql/server:latest"));
+    }
 
-	public static void main(String[] args) {
-		SpringApplication.from(ExerciseApplication::main).with(TestExerciseApplication.class).run(args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.from(ExerciseApplication::main).with(TestExerciseApplication.class).run(args);
+    }
 }
