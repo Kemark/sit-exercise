@@ -1,0 +1,12 @@
+{
+    "scripts": {
+        "start:local-env": "docker-compose --env-file ./.env --file ./local-env/docker-compose.yml --profile=required up --build",
+        "start": "env-cmd -x ./gradlew build bootRun -x test",
+        "start:debug": "env-cmd -x ./gradlew build bootRun -x test --debug-jvm",
+        "test": "./gradlew clean build test", 
+        "build": "./gradlew clean build -x test"
+    },
+    "devDependencies": {
+        "env-cmd": "^10.1.0"
+    }
+}

@@ -8,6 +8,7 @@ bin/
 !**/src/main/**/target/
 !**/src/test/**/target/
 .DS_Store
+package-lock.json
 
 ### containing secrets
 .vault.token
@@ -30,4 +31,3 @@ bin/
 
 ### VS Code ###
 node_modules/
-

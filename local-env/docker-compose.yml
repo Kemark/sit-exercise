@@ -1,0 +1,64 @@
+  
+services:
+
+   ####   ####  #        ####  ###### #####  #    # ###### #####  
+  #      #    # #       #      #      #    # #    # #      #    # 
+   ####  #    # #        ####  #####  #    # #    # #####  #    # 
+       # #  # # #            # #      #####  #    # #      #####  
+  #    # #   #  #       #    # #      #   #   #  #  #      #   #  
+   ####   ### # ######   ####  ###### #    #   ##   ###### #    # 
+  sqlserver:
+    container_name: sql-server
+    profiles:
+        - "required"
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: ${MSSQL_ADMIN_PASSWORD}
+      SA_USER: ${MSSQL_ADMIN_USERNAME}
+      MSSQL_SIT_EXERCISE_USERNAME: ${MSSQL_SIT_EXERCISE_USERNAME}
+      MSSQL_SIT_EXERCISE_PASSWORD: ${MSSQL_SIT_EXERCISE_PASSWORD}
+      MSSQL_SIT_EXERCISE_DBNAME: ${MSSQL_SIT_EXERCISE_DBNAME}
+    build:
+      context: ./mssql
+      dockerfile: Dockerfile
+    networks:
+      - sit-exercise-net
+    # volumes:
+    #   - ./mssql/.scripts:/scripts/exec
+    ports:
+      - "1433:1433"
+
+
+       #   ##   ######  ####  ###### #####  
+       #  #  #  #      #    # #      #    # 
+       # #    # #####  #      #####  #    # 
+       # ###### #      #  ### #      #####  
+  #    # #    # #      #    # #      #   #  
+   ####  #    # ######  ####  ###### #    # 
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    profiles:
+        - "required"
+    container_name: jaeger
+    restart: unless-stopped
+    networks:
+      - sit-exercise-net
+    ports:
+      - 5775:5775/udp
+      - 6831:6831/udp
+      - 6832:6832/udp
+      - 5778:5778
+      - 16686:16686
+      - 14268:14268
+      - 14250:14250
+      - 9411:9411
+      - 4317:4317
+      - 4318:4318
+    environment:
+      COLLECTOR_ZIPKIN_HOST_PORT: 9411
+      COLLECTOR_OTLP_ENABLED: true
+
+networks:
+  sit-exercise-net:
+    name: sit-exercise-net
+
