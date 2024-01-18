@@ -24,11 +24,12 @@ repositories {
 
 ext {
 	versions = [
-		checkstyle	   : "0.0.41",
-		mapstruct      : "1.5.5.Final",
-		instancio      : "4.0.0",
-		springDoc 	   : "2.3.0",
-		javaDocTherapi : "0.13.0"
+		checkstyle	      : "0.0.41",
+		mapstruct         : "1.5.5.Final",
+		instancio         : "4.0.0",
+		springDoc 	      : "2.3.0",
+		javaDocTherapi    : "0.13.0",
+		ttddyyObservation : "1.0.2"
   	]
 }
 
@@ -62,6 +63,16 @@ dependencies {
 	implementation "org.mapstruct:mapstruct:${versions.mapstruct}"
 	annotationProcessor "org.mapstruct:mapstruct-processor:${versions.mapstruct}"	 
 	testAnnotationProcessor "org.mapstruct:mapstruct-processor:${versions.mapstruct}"	 
+
+	// # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+	// micrometer / tracing / jaeger
+	// # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+	implementation platform('io.micrometer:micrometer-tracing-bom:latest.release')
+    implementation "io.micrometer:micrometer-tracing"
+    implementation "io.micrometer:micrometer-observation"
+    implementation "io.micrometer:micrometer-tracing-bridge-otel"
+    implementation "io.opentelemetry:opentelemetry-exporter-otlp"
+	implementation "net.ttddyy.observation:datasource-micrometer-spring-boot:${versions.ttddyyObservation}"
 
 	// # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 	// Swagger / Spring Doc

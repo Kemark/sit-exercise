@@ -1,4 +1,6 @@
 spring:
+    application:
+        name: sit-exercise
     jpa:
         hibernate:
             ddl-auto: update
@@ -25,3 +27,12 @@ logging:
         org:
             springframework:
                 security: trace
+
+# Distributed Tracing
+management:
+    otlp:
+        tracing:
+            endpoint: http://localhost:4318/v1/traces
+    tracing:
+        sampling:
+            probability: 1

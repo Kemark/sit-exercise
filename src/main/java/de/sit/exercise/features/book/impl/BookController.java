@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import de.sit.exercise.features.book.BookDto;
 import de.sit.exercise.features.book.BookMapper;
 import de.sit.exercise.features.book.IBookService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -28,6 +29,7 @@ import lombok.RequiredArgsConstructor;
  */
 @RestController
 @RequestMapping("api")
+@Getter
 @RequiredArgsConstructor
 public class BookController {
 
@@ -44,15 +46,15 @@ public class BookController {
 
     @GetMapping(value = "/book/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public final ResponseEntity<BookDto> getById(final @NonNull @PathVariable UUID id) {
-        var model = service.findById(id);
-        return ResponseEntity.ok(mapper.toDto(model));
+        var model = getService().findById(id);
+        return ResponseEntity.ok(getMapper().toDto(model));
     }
 
     @GetMapping(value = "/book", produces = MediaType.APPLICATION_JSON_VALUE)
     public final ResponseEntity<Page<BookDto>> getFiltered(@NonNull final Pageable pageable,
             @RequestParam(required = false) final String searchString) {
-        var pagedModels = service.findFiltered(pageable, searchString);
-        return ResponseEntity.ok(mapper.toPage(pagedModels, pageable));
+        var pagedModels = getService().findFiltered(pageable, searchString);
+        return ResponseEntity.ok(getMapper().toPage(pagedModels, pageable));
     }
 
     // @@@@@   @@@@   @@@@  @@@@@
@@ -65,8 +67,8 @@ public class BookController {
     @PostMapping(value = "/book", produces = MediaType.APPLICATION_JSON_VALUE)
     public final ResponseEntity<BookDto> create(
             final @RequestBody @Validated @NonNull BookDto dto) {
-        var model = service.create(dto);
-        return ResponseEntity.ok(mapper.toDto(model));
+        var model = getService().create(dto);
+        return ResponseEntity.ok(getMapper().toDto(model));
     }
 
     // @@@@@  @    @ @@@@@
@@ -80,8 +82,8 @@ public class BookController {
     public final ResponseEntity<BookDto> update(
             @NonNull @PathVariable final UUID id,
             final @RequestBody @Validated @NonNull BookDto dto) {
-        var model = service.update(id, dto);
-        return ResponseEntity.ok(mapper.toDto(model));
+        var model = getService().update(id, dto);
+        return ResponseEntity.ok(getMapper().toDto(model));
     }
 
     // @@@@@  @@@@@@ @      @@@@@@ @@@@@ @@@@@@
@@ -93,7 +95,7 @@ public class BookController {
 
     @DeleteMapping(value = "/book/{id}")
     public final ResponseEntity<Void> delete(@NonNull @PathVariable final UUID id) {
-        service.delete(id);
+        getService().delete(id);
         return ResponseEntity.noContent().build();
     }
 }

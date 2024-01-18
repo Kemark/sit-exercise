@@ -8,11 +8,13 @@ import org.springframework.stereotype.Service;
 import de.sit.exercise.components.auth.JwtTokenProvider;
 import de.sit.exercise.features.customer.ICustomerService;
 import de.sit.exercise.features.token.ITokenService;
+import io.micrometer.observation.annotation.Observed;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @Getter
+@Observed
 @RequiredArgsConstructor
 public class TokenService implements ITokenService {
     private final ICustomerService customerService;

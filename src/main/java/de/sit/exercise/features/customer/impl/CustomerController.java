@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import de.sit.exercise.features.customer.CustomerDto;
 import de.sit.exercise.features.customer.CustomerMapper;
 import de.sit.exercise.features.customer.ICustomerService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -29,12 +30,13 @@ import lombok.RequiredArgsConstructor;
  */
 @RestController
 @RequestMapping("api")
+@Getter
 @RequiredArgsConstructor
 public class CustomerController {
 
-    private final CustomerMapper customerMapper;
+    private final CustomerMapper mapper;
 
-    private final ICustomerService customerService;
+    private final ICustomerService service;
 
     // @@@@  @@@@@@ @@@@@
     // @    @ @        @
@@ -45,15 +47,15 @@ public class CustomerController {
 
     @GetMapping(value = "/customer/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public final ResponseEntity<CustomerDto> getById(final @NonNull @PathVariable UUID id) {
-        var model = customerService.findById(id);
-        return ResponseEntity.ok(customerMapper.toDto(model));
+        var model = getService().findById(id);
+        return ResponseEntity.ok(getMapper().toDto(model));
     }
 
     @GetMapping(value = "/customer", produces = MediaType.APPLICATION_JSON_VALUE)
     public final ResponseEntity<Page<CustomerDto>> getFiltered(@NonNull final Pageable pageable,
             @NonNull @RequestParam(required = false) final String searchString) {
-        var pagedModels = customerService.findFiltered(pageable, searchString);
-        return ResponseEntity.ok(customerMapper.toPage(pagedModels, pageable));
+        var pagedModels = getService().findFiltered(pageable, searchString);
+        return ResponseEntity.ok(getMapper().toPage(pagedModels, pageable));
     }
 
     // @@@@@   @@@@   @@@@  @@@@@
@@ -66,8 +68,8 @@ public class CustomerController {
     @PostMapping(value = "/customer", produces = MediaType.APPLICATION_JSON_VALUE)
     public final ResponseEntity<CustomerDto> create(
             final @RequestBody @Validated @NonNull CustomerDto dto) {
-        var model = customerService.create(dto);
-        return ResponseEntity.ok(customerMapper.toDto(model));
+        var model = getService().create(dto);
+        return ResponseEntity.ok(getMapper().toDto(model));
     }
 
     // @@@@@  @    @ @@@@@
@@ -81,8 +83,8 @@ public class CustomerController {
     public final ResponseEntity<CustomerDto> update(
             @NonNull @PathVariable final UUID id,
             final @RequestBody @Validated @NonNull CustomerDto dto) {
-        var model = customerService.update(id, dto);
-        return ResponseEntity.ok(customerMapper.toDto(model));
+        var model = getService().update(id, dto);
+        return ResponseEntity.ok(getMapper().toDto(model));
     }
 
     // @@@@@  @@@@@@ @      @@@@@@ @@@@@ @@@@@@
@@ -94,7 +96,7 @@ public class CustomerController {
 
     @DeleteMapping(value = "/customer/{id}")
     public final ResponseEntity<Void> delete(@NonNull @PathVariable final UUID id) {
-        customerService.delete(id);
+        getService().delete(id);
         return ResponseEntity.noContent().build();
     }
 }
